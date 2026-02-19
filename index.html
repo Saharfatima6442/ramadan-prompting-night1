@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ramadan Prompting Nights</title>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    /* ── RESET & BASE ─────────────────────────────────────── */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0; padding: 0;
+    }
+
+    :root {
+      --gold:        #d4af37;
+      --gold-dim:    rgba(212,175,55,0.35);
+      --gold-glow:   rgba(212,175,55,0.12);
+      --night-deep:  #050810;
+      --night-mid:   #0a0f1e;
+      --night-soft:  #0f1628;
+      --text-bright: #f7efd4;
+      --text-mid:    #c8b88a;
+      --text-dim:    rgba(200,184,138,0.55);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--night-deep);
+      color: var(--text-bright);
+      font-family: 'Cairo', sans-serif;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* ── STARS CANVAS ─────────────────────────────────────── */
+    #stars-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ── NAV ──────────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 60px;
+      background: linear-gradient(to bottom, rgba(5,8,16,0.95), transparent);
+      backdrop-filter: blur(2px);
+    }
+
+    .nav-logo {
+      font-family: 'Amiri', serif;
+      font-size: 1.3rem;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      text-shadow: 0 0 20px rgba(212,175,55,0.5);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 36px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-mid);
+      text-decoration: none;
+      transition: color 0.3s;
+      position: relative;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px; left: 0;
+      width: 0; height: 1px;
+      background: var(--gold);
+      transition: width 0.3s;
+    }
+
+    .nav-links a:hover { color: var(--gold); }
+    .nav-links a:hover::after { width: 100%; }
+
+    .nav-cta {
+      font-family: 'Cairo', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 9px 24px;
+      border: 1px solid var(--gold-dim);
+      border-radius: 2px;
+      background: transparent;
+      color: var(--gold);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .nav-cta:hover {
+      background: var(--gold);
+      color: var(--night-deep);
+      box-shadow: 0 0 20px rgba(212,175,55,0.35);
+    }
+
+    /* ── HERO ─────────────────────────────────────────────── */
+    section.ramadan-hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    /* Moon glow orb */
+    .hero-orb {
+      position: absolute;
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px; height: 600px;
+      background: radial-gradient(ellipse at center,
+        rgba(212,175,55,0.07) 0%,
+        rgba(212,175,55,0.03) 35%,
+        transparent 70%);
+      pointer-events: none;
+      animation: orbPulse 6s ease-in-out infinite;
+    }
+
+    @keyframes orbPulse {
+      0%,100% { transform: translateX(-50%) scale(1);   opacity: 0.8; }
+      50%      { transform: translateX(-50%) scale(1.1); opacity: 1;   }
+    }
+
+    /* Crescent */
+    .hero-crescent {
+      position: relative;
+      z-index: 2;
+      font-size: clamp(52px, 8vw, 80px);
+      line-height: 1;
+      margin-bottom: 24px;
+      filter: drop-shadow(0 0 18px rgba(212,175,55,0.7))
+              drop-shadow(0 0 40px rgba(212,175,55,0.3));
+      animation: float 4s ease-in-out infinite, fadeDown 1s ease both;
+    }
+
+    @keyframes float {
+      0%,100% { transform: translateY(0);   }
+      50%      { transform: translateY(-12px); }
+    }
+
+    /* Gold rule */
+    .hero-rule {
+      position: relative; z-index: 2;
+      width: 100px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin: 0 auto 28px;
+      animation: fadeIn 1s 0.2s ease both;
+    }
+
+    .hero-rule::before, .hero-rule::after {
+      content: '✦';
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gold);
+      font-size: 8px;
+    }
+    .hero-rule::before { left: -14px; }
+    .hero-rule::after  { right: -14px; }
+
+    /* Eyebrow */
+    .hero-eyebrow {
+      position: relative; z-index: 2;
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 20px;
+      animation: fadeUp 0.9s 0.1s ease both;
+    }
+
+    /* H1 */
+    section.ramadan-hero h1 {
+      position: relative; z-index: 2;
+      font-family: 'Amiri', serif;
+      font-size: clamp(2.4rem, 6.5vw, 5.5rem);
+      font-weight: 700;
+      line-height: 1.15;
+      color: var(--text-bright);
+      text-shadow:
+        0 0 60px rgba(212,175,55,0.25),
+        0 0 120px rgba(212,175,55,0.1),
+        0 2px 4px rgba(0,0,0,0.6);
+      max-width: 820px;
+      margin: 0 auto 20px;
+      animation: fadeUp 0.9s 0.2s ease both;
+    }
+
+    /* Glow underline on key word */
+    section.ramadan-hero h1 .glow-word {
+      color: var(--gold);
+      text-shadow:
+        0 0 20px rgba(212,175,55,0.8),
+        0 0 60px rgba(212,175,55,0.4),
+        0 0 100px rgba(212,175,55,0.2);
+    }
+
+    /* Subtitle */
+    .hero-subtitle {
+      position: relative; z-index: 2;
+      font-size: clamp(0.95rem, 2vw, 1.15rem);
+      font-weight: 300;
+      color: var(--text-mid);
+      max-width: 520px;
+      margin: 0 auto 48px;
+      line-height: 1.8;
+      animation: fadeUp 0.9s 0.35s ease both;
+    }
+
+    /* CTA group */
+    .hero-cta-group {
+      position: relative; z-index: 2;
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeUp 0.9s 0.5s ease both;
+    }
+
+    /* Primary button — JOIN NOW */
+    .btn-primary {
+      font-family: 'Cairo', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      padding: 16px 52px;
+      border: none;
+      border-radius: 2px;
+      background: var(--gold);
+      color: var(--night-deep);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      box-shadow:
+        0 0 30px rgba(212,175,55,0.4),
+        0 0 60px rgba(212,175,55,0.15);
+      transition: box-shadow 0.3s, transform 0.2s;
+    }
+
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: -50%; left: -60%;
+      width: 40%; height: 200%;
+      background: rgba(255,255,255,0.25);
+      transform: skewX(-20deg);
+      animation: shimmer 3s 1.5s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+      0%   { left: -60%; opacity: 0; }
+      20%  { opacity: 1; }
+      100% { left: 140%; opacity: 0; }
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 0 50px rgba(212,175,55,0.6),
+        0 0 90px rgba(212,175,55,0.25),
+        0 8px 24px rgba(0,0,0,0.4);
+    }
+
+    /* Secondary button */
+    .btn-secondary {
+      font-family: 'Cairo', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 16px 40px;
+      border: 1px solid var(--gold-dim);
+      border-radius: 2px;
+      background: transparent;
+      color: var(--text-mid);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(212,175,55,0.06);
+    }
+
+    /* Scroll indicator */
+    .scroll-hint {
+      position: absolute;
+      bottom: 36px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-dim);
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      animation: fadeIn 1s 1.2s ease both;
+    }
+
+    .scroll-line {
+      width: 1px; height: 40px;
+      background: linear-gradient(to bottom, var(--gold-dim), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes scrollPulse {
+      0%,100% { opacity: 0.4; transform: scaleY(1);   }
+      50%      { opacity: 1;   transform: scaleY(1.1); }
+    }
+
+    /* ── FEATURES STRIP ──────────────────────────────────── */
+    .features-strip {
+      position: relative; z-index: 1;
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: wrap;
+      border-top: 1px solid rgba(212,175,55,0.1);
+      border-bottom: 1px solid rgba(212,175,55,0.1);
+      background: rgba(10,15,30,0.8);
+      backdrop-filter: blur(10px);
+      padding: 0;
+    }
+
+    .feature-item {
+      flex: 1;
+      min-width: 200px;
+      max-width: 280px;
+      padding: 36px 28px;
+      text-align: center;
+      border-right: 1px solid rgba(212,175,55,0.1);
+      opacity: 0;
+      animation: fadeUp 0.7s ease forwards;
+    }
+
+    .feature-item:last-child { border-right: none; }
+    .feature-item:nth-child(1) { animation-delay: 0.1s; }
+    .feature-item:nth-child(2) { animation-delay: 0.2s; }
+    .feature-item:nth-child(3) { animation-delay: 0.3s; }
+    .feature-item:nth-child(4) { animation-delay: 0.4s; }
+
+    .feature-icon {
+      font-size: 1.8rem;
+      margin-bottom: 12px;
+      filter: drop-shadow(0 0 8px rgba(212,175,55,0.5));
+    }
+
+    .feature-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 6px;
+    }
+
+    .feature-desc {
+      font-size: 0.82rem;
+      font-weight: 300;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    /* ── ABOUT SECTION ───────────────────────────────────── */
+    .about-section {
+      position: relative; z-index: 1;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 100px 24px;
+      text-align: center;
+    }
+
+    .section-eyebrow {
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-family: 'Amiri', serif;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 700;
+      color: var(--text-bright);
+      margin-bottom: 24px;
+      text-shadow: 0 0 40px rgba(212,175,55,0.15);
+      line-height: 1.3;
+    }
+
+    .section-body {
+      font-size: 1rem;
+      font-weight: 300;
+      color: var(--text-mid);
+      line-height: 2;
+      max-width: 600px;
+      margin: 0 auto 40px;
+    }
+
+    .gold-divider {
+      width: 60px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin: 32px auto;
+    }
+
+    /* ── SCHEDULE SECTION ─────────────────────────────────── */
+    .schedule-section {
+      position: relative; z-index: 1;
+      padding: 80px 24px;
+      background: linear-gradient(to bottom, transparent, rgba(10,15,30,0.6), transparent);
+    }
+
+    .schedule-inner {
+      max-width: 860px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .nights-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1px;
+      background: rgba(212,175,55,0.1);
+      border: 1px solid rgba(212,175,55,0.12);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 48px;
+    }
+
+    .night-card {
+      background: var(--night-mid);
+      padding: 32px 20px;
+      text-align: center;
+      transition: background 0.3s;
+      cursor: default;
+    }
+
+    .night-card:hover {
+      background: rgba(212,175,55,0.06);
+    }
+
+    .night-num {
+      font-family: 'Amiri', serif;
+      font-size: 2.2rem;
+      color: var(--gold);
+      text-shadow: 0 0 20px rgba(212,175,55,0.5);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .night-label {
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+
+    .night-topic {
+      font-size: 0.88rem;
+      font-weight: 400;
+      color: var(--text-mid);
+      line-height: 1.5;
+    }
+
+    /* ── FINAL CTA ────────────────────────────────────────── */
+    .final-cta {
+      position: relative; z-index: 1;
+      padding: 120px 24px;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .final-cta-orb {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(ellipse,
+        rgba(212,175,55,0.08) 0%,
+        transparent 65%);
+      pointer-events: none;
+    }
+
+    .final-cta h2 {
+      font-family: 'Amiri', serif;
+      font-size: clamp(1.8rem, 4.5vw, 3.5rem);
+      font-weight: 700;
+      color: var(--text-bright);
+      margin-bottom: 16px;
+      text-shadow: 0 0 40px rgba(212,175,55,0.2);
+    }
+
+    .final-cta p {
+      font-size: 1rem;
+      font-weight: 300;
+      color: var(--text-mid);
+      margin-bottom: 44px;
+      max-width: 440px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ── FOOTER ───────────────────────────────────────────── */
+    footer {
+      position: relative; z-index: 1;
+      padding: 32px 60px;
+      border-top: 1px solid rgba(212,175,55,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .footer-logo {
+      font-family: 'Amiri', serif;
+      font-size: 1.1rem;
+      color: var(--gold);
+      text-shadow: 0 0 16px rgba(212,175,55,0.4);
+    }
+
+    .footer-text {
+      font-size: 0.78rem;
+      font-weight: 300;
+      color: var(--text-dim);
+      letter-spacing: 0.05em;
+    }
+
+    .footer-arabic {
+      font-family: 'Amiri', serif;
+      font-size: 1rem;
+      color: var(--text-dim);
+      direction: rtl;
+    }
+
+    /* ── ANIMATIONS ───────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0);    }
+    }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0);     }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    /* ── MOBILE RESPONSIVE ────────────────────────────────── */
+    @media (max-width: 768px) {
+      nav {
+        padding: 16px 24px;
+      }
+      .nav-links { display: none; }
+
+      section.ramadan-hero { padding: 100px 20px 70px; }
+
+      .feature-item {
+        border-right: none;
+        border-bottom: 1px solid rgba(212,175,55,0.1);
+        max-width: 100%;
+      }
+      .feature-item:last-child { border-bottom: none; }
+
+      footer {
+        padding: 28px 24px;
+        text-align: center;
+        justify-content: center;
+        flex-direction: column;
+      }
+
+      .hero-orb { width: 320px; height: 320px; }
+    }
+
+    @media (max-width: 480px) {
+      .hero-cta-group { flex-direction: column; align-items: center; }
+      .btn-primary, .btn-secondary { width: 100%; max-width: 280px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Stars -->
+<canvas id="stars-canvas"></canvas>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">☪ Ramadan Nights</div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#schedule">Schedule</a></li>
+    <li><a href="#join">Register</a></li>
+  </ul>
+  <button class="nav-cta" onclick="document.getElementById('join').scrollIntoView({behavior:'smooth'})">Join Now</button>
+</nav>
+
+<!-- HERO -->
+<section class="ramadan-hero" id="hero">
+  <div class="hero-orb"></div>
+
+  <div class="hero-crescent">☪</div>
+  <p class="hero-eyebrow">رمضان المبارك · 1446 AH</p>
+  <div class="hero-rule"></div>
+
+  <h1>Ramadan <span class="glow-word">Prompting</span> Nights</h1>
+
+  <p class="hero-subtitle">
+    Thirty nights of deep learning, AI mastery, and community. 
+    Build your first intelligent agent under the blessed month's light.
+  </p>
+
+  <div class="hero-cta-group">
+    <button class="btn-primary" id="joinBtn">Join Now</button>
+    <button class="btn-secondary">Learn More</button>
+  </div>
+
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- FEATURES STRIP -->
+<div class="features-strip">
+  <div class="feature-item">
+    <div class="feature-icon">🌙</div>
+    <div class="feature-title">30 Nights</div>
+    <div class="feature-desc">A new lesson each night of the holy month</div>
+  </div>
+  <div class="feature-item">
+    <div class="feature-icon">🤖</div>
+    <div class="feature-title">AI Agents</div>
+    <div class="feature-desc">Build real autonomous systems with Claude Code</div>
+  </div>
+  <div class="feature-item">
+    <div class="feature-icon">🌐</div>
+    <div class="feature-title">Live Sessions</div>
+    <div class="feature-desc">Weekly Zoom meetings with the community</div>
+  </div>
+  <div class="feature-item">
+    <div class="feature-icon">✦</div>
+    <div class="feature-title">Free Access</div>
+    <div class="feature-desc">Open to all — beginners to advanced developers</div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<div class="about-section" id="about">
+  <p class="section-eyebrow">About the Programme</p>
+  <h2 class="section-title">Where Faith Meets the Future</h2>
+  <div class="gold-divider"></div>
+  <p class="section-body">
+    Ramadan Prompting Nights is a month-long learning initiative designed to help developers, students, and entrepreneurs harness the power of AI agents. Each night we gather to learn, build, and grow — combining the spirit of Ramadan with the craft of modern AI engineering.
+  </p>
+  <button class="btn-primary" style="margin:0 auto;display:block;">Reserve Your Seat</button>
+</div>
+
+<!-- SCHEDULE -->
+<div class="schedule-section" id="schedule">
+  <div class="schedule-inner">
+    <p class="section-eyebrow">Programme Highlights</p>
+    <h2 class="section-title">What You'll Build</h2>
+    <div class="gold-divider"></div>
+
+    <div class="nights-grid">
+      <div class="night-card">
+        <div class="night-num">01</div>
+        <div class="night-label">Night One</div>
+        <div class="night-topic">Claude Code Setup & First Agent</div>
+      </div>
+      <div class="night-card">
+        <div class="night-num">07</div>
+        <div class="night-label">Night Seven</div>
+        <div class="night-topic">Obsidian Vault & Memory Systems</div>
+      </div>
+      <div class="night-card">
+        <div class="night-num">14</div>
+        <div class="night-label">Night Fourteen</div>
+        <div class="night-topic">MCP Servers & External Actions</div>
+      </div>
+      <div class="night-card">
+        <div class="night-num">21</div>
+        <div class="night-label">Night Twenty One</div>
+        <div class="night-topic">Digital FTE — Your AI Employee</div>
+      </div>
+      <div class="night-card">
+        <div class="night-num">27</div>
+        <div class="night-label">Laylatul Qadr</div>
+        <div class="night-topic">Full Autonomous Agent Demo</div>
+      </div>
+      <div class="night-card">
+        <div class="night-num">30</div>
+        <div class="night-label">Final Night</div>
+        <div class="night-topic">Showcase & Graduation</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FINAL CTA -->
+<div class="final-cta" id="join">
+  <div class="final-cta-orb"></div>
+  <p class="section-eyebrow">Begin Your Journey</p>
+  <h2>Don't Miss a Single Night</h2>
+  <p>Join thousands of learners building the future — one prompt at a time.</p>
+  <button class="btn-primary" style="font-size:1rem;padding:18px 64px;">Join Now</button>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">☪ Ramadan Prompting Nights</div>
+  <div class="footer-text">© 2025 Panaversity · All rights reserved</div>
+  <div class="footer-arabic">رمضان مبارك</div>
+</footer>
+
+<!-- STARS SCRIPT -->
+<script>
+  // Animated star field
+  (function() {
+    const canvas = document.getElementById('stars-canvas');
+    const ctx    = canvas.getContext('2d');
+    let   W, H, stars = [];
+
+    function resize() {
+      W = canvas.width  = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+
+    function createStars(n) {
+      stars = [];
+      for (let i = 0; i < n; i++) {
+        stars.push({
+          x:    Math.random() * W,
+          y:    Math.random() * H,
+          r:    Math.random() * 1.2 + 0.2,
+          a:    Math.random(),
+          da:   (Math.random() * 0.004 + 0.001) * (Math.random() < 0.5 ? 1 : -1),
+          gold: Math.random() < 0.08
+        });
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      for (const s of stars) {
+        s.a += s.da;
+        if (s.a > 1 || s.a < 0) s.da *= -1;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = s.gold
+          ? `rgba(212,175,55,${s.a * 0.8})`
+          : `rgba(255,255,255,${s.a * 0.7})`;
+        ctx.fill();
+      }
+      requestAnimationFrame(draw);
+    }
+
+    resize();
+    createStars(280);
+    draw();
+    window.addEventListener('resize', () => { resize(); createStars(280); });
+  })();
+
+  // Join Now button ripple
+  document.querySelectorAll('.btn-primary').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      const r  = document.createElement('span');
+      const sz = Math.max(this.offsetWidth, this.offsetHeight);
+      const rc = this.getBoundingClientRect();
+      r.style.cssText = `
+        position:absolute; border-radius:50%;
+        width:${sz}px; height:${sz}px;
+        left:${e.clientX - rc.left - sz/2}px;
+        top:${e.clientY - rc.top  - sz/2}px;
+        background:rgba(255,255,255,0.3);
+        transform:scale(0); animation:ripple 0.5s ease-out;
+        pointer-events:none;
+      `;
+      this.style.position = 'relative';
+      this.style.overflow  = 'hidden';
+      this.appendChild(r);
+      setTimeout(() => r.remove(), 500);
+    });
+  });
+</script>
+
+<style>
+  @keyframes ripple {
+    to { transform: scale(2.5); opacity: 0; }
+  }
+</style>
+
+</body>
+</html>
